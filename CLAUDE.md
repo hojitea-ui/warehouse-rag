@@ -41,8 +41,14 @@
 - 벡터 저장소는 `data/vectors.json`, 형식은 `{ model, dtype, dim, createdAt, chunks: [{ id, text, url, section, vector }] }`.
 - 저장소의 `model`·`dtype`이 현재 embedder의 `MODEL`·`DTYPE`과 다르면 검색을 거부하고 "build-index를 다시 실행하라"고 안내한다.
 
+## 검색 계약
+- 벡터는 정규화되어 있으므로 코사인 유사도 = 내적. 점수 내림차순 top-k(기본 3).
+- 약한 근거 기준 `WEAK_THRESHOLD = 0.55`는 `src/search.mjs`에서만 정의·export하고 다른 파일은 import한다.
+  - 1위 점수가 이보다 낮으면 "관련 자료가 약함"으로 표시한다. 결과는 버리지 않는다.
+- `search.mjs`는 다른 파일이 `search()`를 import해도 CLI가 실행되지 않게, 직접 실행됐을 때만 CLI를 돈다.
+  - 확인: `import.meta.url === pathToFileURL(process.argv[1]).href`
+
 ## 결정 필요
-- 검색 결과는 몇 개를 가져오고, 기준 점수는 얼마로 할 것인가?
 - LLM에게 줄 규칙(프롬프트)은 무엇인가?
 - 위키백과 자료는 어떤 문서를 어떻게 가져올 것인가?
 - 검색 결과를 어떤 형식으로 보여 주고 저장할 것인가?
