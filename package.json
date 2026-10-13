@@ -1,4 +1,7 @@
 {
   "name": "warehouse-rag",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.1"
+  }
 }

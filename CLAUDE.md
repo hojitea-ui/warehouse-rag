@@ -30,9 +30,19 @@
 - `text`는 최소 120자, 사실 하나. 원문에 없는 말을 보태지 않는다.
 - `url`은 확인 가능한 출처. 웹은 퍼센트 인코딩된 주소, 내 SOP는 `docs/sop.md#제목`(공백은 하이픈).
 
+## 임베딩 계약
+- 모델은 `onnx-community/embeddinggemma-300m-ONNX`, `@huggingface/transformers`의 `pipeline("feature-extraction", MODEL, { dtype: "q8" })`로 실행한다.
+- 호출 옵션은 `{ pooling: "mean", normalize: true }`, 출력은 768차원.
+- 입력 형식
+  - 문서: `"title: " + section + " | text: " + text`
+  - 질문: `"task: search result | query: " + question`
+- 임베딩 설정은 `src/embedder.mjs` 한 곳에서만 정의한다. 파이프라인은 한 번만 만들어 재사용한다.
+  - export: `embedDocument(chunk)`, `embedQuery(question)`, `MODEL`, `DTYPE`, `DIM`.
+- 벡터 저장소는 `data/vectors.json`, 형식은 `{ model, dtype, dim, createdAt, chunks: [{ id, text, url, section, vector }] }`.
+- 저장소의 `model`·`dtype`이 현재 embedder의 `MODEL`·`DTYPE`과 다르면 검색을 거부하고 "build-index를 다시 실행하라"고 안내한다.
+
 ## 결정 필요
-- 임베딩 모델은 무엇을 쓰고, 설정은 어떻게 할 것인가?
 - 검색 결과는 몇 개를 가져오고, 기준 점수는 얼마로 할 것인가?
 - LLM에게 줄 규칙(프롬프트)은 무엇인가?
 - 위키백과 자료는 어떤 문서를 어떻게 가져올 것인가?
-- 임베딩과 검색 결과를 어떤 파일 형식으로 저장할 것인가?
+- 검색 결과를 어떤 형식으로 보여 주고 저장할 것인가?
